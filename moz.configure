@@ -997,4 +997,4 @@ set_config("CONFIG_STATUS_DEPS", config_status_deps)
 # Please do not add anything after setting config_dep_paths.
 
 # Disable PulseAudio support
-ac_add_options('--disable-pulseaudio')
+imply_option("--disable-pulseaudio", imply_pulseaudio, reason="--disable-audio-backends")
