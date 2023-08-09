@@ -1,6 +1,2 @@
 # Specify the path to NSS source code
 ac_add_options --with-system-nss
-
-# Disable Pulse
---disable-pulseaudio 
---enable-alsa
