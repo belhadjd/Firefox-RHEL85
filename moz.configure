@@ -997,7 +997,5 @@ set_config("CONFIG_STATUS_DEPS", config_status_deps)
 # Please do not add anything after setting config_dep_paths.
 
 # Disable PulseAudio support
-imply_option("--disable-pulseaudio", imply_pulseaudio, reason="--disable-audio-backends")
+# imply_option("--disable-pulseaudio", imply_pulseaudio, reason="--disable-audio-backends")
 
-
-imply_option("--without-sysroot", imply_sysroot, reason="--without-sysroot")
