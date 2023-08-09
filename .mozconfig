@@ -2,4 +2,5 @@
 ac_add_options --with-system-nss
 
 # Disable Pulse
-ac_add_options --disable-pulse
+--disable-pulseaudio 
+--enable-alsa
