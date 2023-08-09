@@ -996,6 +996,207 @@ def config_status_deps(build_env, build_project):
 set_config("CONFIG_STATUS_DEPS", config_status_deps)
 # Please do not add anything after setting config_dep_paths.
 
-# Disable PulseAudio support
-# imply_option("--disable-pulseaudio", imply_pulseaudio, reason="--disable-audio-backends")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Enable various cubeb backends
+# ==============================================================
+@depends(target)
+def audio_backends_default(target):
+    if target.os == "Android":
+        return (
+            "aaudio",
+            "opensl",
+        )
+    elif target.os in ("DragonFly", "FreeBSD", "SunOS"):
+        return ("oss",)
+    elif target.os == "OpenBSD":
+        return ("sndio",)
+    elif target.os == "OSX":
+        return ("audiounit",)
+    elif target.os == "NetBSD":
+        return ("sunaudio",)
+    elif target.os == "SunOS":
+        return ("sunaudio",)
+    elif target.os == "WINNT":
+        return ("wasapi",)
+    else:
+        return ("pulseaudio",)
+
+
+option(
+    "--enable-audio-backends",
+    nargs="+",
+    choices=(
+        "aaudio",
+        "alsa",
+        "audiounit",
+        "jack",
+        "opensl",
+        "oss",
+        "pulseaudio",
+        "sndio",
+        "sunaudio",
+        "wasapi",
+    ),
+    default=audio_backends_default,
+    help="{Enable|Disable} various cubeb backends",
+)
+
+
+@depends("--enable-audio-backends", target)
+def imply_aaudio(values, target):
+    if any("aaudio" in value for value in values) and target.os != "Android":
+        die("Cannot enable AAudio on %s", target.os)
+    return any("aaudio" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_alsa(values, target):
+    if (
+        any("alsa" in value for value in values)
+        and target.kernel != "Linux"
+        and target.os != "FreeBSD"
+    ):
+        die("Cannot enable ALSA on %s", target.os)
+    return any("alsa" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_audiounit(values, target):
+    if (
+        any("audiounit" in value for value in values)
+        and target.os != "OSX"
+        and target.kernel != "Darwin"
+    ):
+        die("Cannot enable AudioUnit on %s", target.os)
+    return any("audiounit" in value for value in values) or None
+
+
+@depends("--enable-audio-backends")
+def imply_jack(values):
+    return any("jack" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_opensl(values, target):
+    if any("opensl" in value for value in values) and target.os != "Android":
+        die("Cannot enable OpenSL on %s", target.os)
+    return any("opensl" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_oss(values, target):
+    if any("oss" in value for value in values) and (
+        target.os == "Android" or target.os == "OSX" or target.os == "WINNT"
+    ):
+        die("Cannot enable OSS on %s", target.os)
+    return any("oss" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_pulseaudio(values, target):
+    if any("pulseaudio" in value for value in values) and (
+        target.os == "Android" or target.os == "OSX" or target.os == "WINNT"
+    ):
+        die("Cannot enable PulseAudio on %s", target.os)
+    return any("pulseaudio" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_sndio(values, target):
+    if any("sndio" in value for value in values) and (
+        target.os == "Android" or target.os == "OSX" or target.os == "WINNT"
+    ):
+        die("Cannot enable sndio on %s", target.os)
+    return any("sndio" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_sunaudio(values, target):
+    if any("sunaudio" in value for value in values) and (
+        target.os != "NetBSD" and target.os != "SunOS"
+    ):
+        die("Cannot enable sunaudio on %s", target.os)
+    return any("sunaudio" in value for value in values) or None
+
+
+@depends("--enable-audio-backends", target)
+def imply_wasapi(values, target):
+    if any("wasapi" in value for value in values) and target.os != "WINNT":
+        die("Cannot enable WASAPI on %s", target.os)
+    return any("wasapi" in value for value in values) or None
+
+
+set_config("MOZ_AAUDIO", imply_aaudio, when="--enable-audio-backends")
+
+imply_option("--enable-alsa", imply_alsa, reason="--enable-audio-backends")
+
+set_config("MOZ_AUDIOUNIT_RUST", imply_audiounit, when="--enable-audio-backends")
+
+imply_option("--enable-jack", imply_jack, reason="--enable-audio-backends")
+
+set_config("MOZ_OPENSL", imply_opensl, when="--enable-audio-backends")
+
+set_config("MOZ_OSS", imply_oss, when="--enable-audio-backends")
+
+imply_option("--enable-pulseaudio", imply_pulseaudio, reason="--enable-audio-backends")
+
+imply_option("--enable-sndio", imply_sndio, reason="--enable-audio-backends")
+
+set_config("MOZ_SUNAUDIO", imply_sunaudio, when="--enable-audio-backends")
+
+set_config("MOZ_WASAPI", imply_wasapi, when="--enable-audio-backends")
+
+# ALSA cubeb backend
+# ==============================================================
+option("--enable-alsa", env="MOZ_ALSA", help="Enable ALSA audio backend.")
+
+
+@depends("--enable-alsa", midir_linux_support)
+def enable_alsa_or_midir_linux_support(alsa_enabled, midir_linux_support):
+    return alsa_enabled or midir_linux_support
+
+
+pkg_check_modules("MOZ_ALSA", "alsa", when=enable_alsa_or_midir_linux_support)
+
+set_config("MOZ_ALSA", True, when="--enable-alsa")
++
+−set_define("MOZ_ALSA", True, when="--enable-alsa")
