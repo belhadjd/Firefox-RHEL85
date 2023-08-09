@@ -1,0 +1,8 @@
+# Enable building NSS
+ac_add_options --enable-nss
+
+# Specify the path to NSS source code
+ac_add_options --with-system-nss
+
+# Disable Pulse
+ac_add_options --disable-pulse
