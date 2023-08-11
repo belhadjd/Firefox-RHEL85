@@ -1,2 +1,4 @@
 # Specify the path to NSS source code
 ac_add_options --with-system-nss
+
+ac_add_options --without-sysroot
