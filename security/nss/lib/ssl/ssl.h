@@ -371,7 +371,7 @@ SSL_IMPORT PRFileDesc *DTLS_ImportFD(PRFileDesc *model, PRFileDesc *fd);
  *
  * GREASE values MUST nerver be negotiated but ignored.
  */
-#define SSL_ENABLE_GREASE 42
+
 
 /* Enables TLS ClientHello Extension Permutation.
  *
